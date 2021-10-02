@@ -1,0 +1,62 @@
+version: "3"
+
+volumes:
+    db-data:
+    vendor:
+    var:
+
+services:
+    presta_mysql:
+        image: mysql:5
+        # platform: linux/x86_64
+        ports:
+            - "3306:3306"
+        expose:
+            - "3306"
+        volumes:
+            - db-data:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: DBPASSWORD
+            MYSQL_PASSWORD: DBPASSWORD
+            MYSQL_USER: USERNAME
+            MYSQL_DATABASE: DBNAME
+        networks:
+            - traefik
+        restart: always
+    monsite:
+        container_name: prestashop-git
+        build:
+            context: .
+            dockerfile: ./Docker/Dockerfile
+       # labels:
+       #    - traefik.http.routers.monsite.rule=Host(`monsite.com`, `www.monsite.com`)
+       #    - traefik.http.routers.monsite.tls=true
+       #    - traefik.http.routers.monsite.tls.certresolver=lets-encrypt
+       #    - traefik.port=80
+        networks:
+            - traefik
+        environment:
+            PS_INSTALL_AUTO: 1
+            DB_PASSWD: DBPASSWORD
+            DB_NAME: DBNAME
+            DB_SERVER: presta_mysql
+            PS_DOMAIN: localhost:8001
+            PS_FOLDER_INSTALL: install-dev
+            PS_FOLDER_ADMIN: admin5843mdkke
+        ports:
+            - "8000:80"
+        expose:
+            - "8000"
+        volumes:
+            - ./www/:/var/www/html/:delegated
+            - ./www/vendor:/var/www/html/vendor
+            - ./www/var:/var/www/html/var
+
+#networks:
+#    traefik:
+#        external:
+#            name: web
+
+networks:
+    traefik:
+        driver: bridge

@@ -1,5 +1,1 @@
-FROM prestashop/prestashop-git:7
-
-RUN docker-php-ext-install mysqli pdo pdo_mysql
-
-RUN a2enmod headers && service apache2 restart
+FROM prestashop/prestashop:1.7.7.8-7.3
